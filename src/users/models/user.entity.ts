@@ -6,13 +6,20 @@ import {
     DataType,
     BeforeCreate,
     BeforeUpdate,
+    HasMany,
+    BelongsToMany,
 } from 'sequelize-typescript';
 import { UserRoles } from '../../common/resources/users';
 import { PasswordHelper } from '../../common/helpers/password.helper';
+import { Project, ProjectMember } from '../../projects/models';
+import { Op } from 'sequelize';
 
 @Scopes(() => ({
     byRoles: (role: number) => ({
         where: { role },
+    }),
+    excludesId: (id: number) => ({
+        where: { id: { [Op.ne]: id } },
     }),
 }))
 @Table({
@@ -51,6 +58,12 @@ export class User extends Model {
         allowNull: true,
     })
     declare salt: string;
+
+    @HasMany(() => Project)
+    projects: Project[];
+
+    @BelongsToMany(() => Project, () => ProjectMember)
+    memberProjects: Project[];
 
     @BeforeCreate
     static hashPasswordBeforeCreate(model) {

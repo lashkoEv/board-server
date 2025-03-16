@@ -1,5 +1,6 @@
 {
   "EMAIL_REQUIRED": "Email is required!",
   "PASSWORD_REQUIRED": "Password is required!",
-  "TOKEN_REQUIRED": "Token is required!"
+  "TOKEN_REQUIRED": "Token is required!",
+  "ID_MUST_BE_A_POSITIVE_NUMBER": "ID must be a positive number!"
 }
