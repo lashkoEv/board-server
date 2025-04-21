@@ -28,6 +28,7 @@ import { ProjectsService } from '../projects/projects.service';
 import { UpdateColumnDto } from './models/update-column.dto';
 import { EmptyDto, IdDto } from '../common/base';
 import { ColumnsDto } from './models/columns.dto';
+import { ColumnStatus } from '../common/resources/columns';
 
 @ApiTags('columns')
 @Controller('columns')
@@ -75,6 +76,8 @@ export class ColumnsController {
         const count = await this.columnsService.count(scopes);
 
         if (count) {
+            scopes.push('withTasks');
+
             columns = await this.columnsService.findAll(scopes);
         }
 
@@ -103,6 +106,15 @@ export class ColumnsController {
             throw new BadRequestException({
                 message: 'USER_IS_NOT_THE_PROJECT_OWNER',
                 errorCode: 'USER_IS_NOT_THE_PROJECT_OWNER',
+                statusCode: HttpStatus.BAD_REQUEST,
+            });
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+        if (column.status !== ColumnStatus.custom) {
+            throw new BadRequestException({
+                message: 'CANNOT_DELETE_COLUMN',
+                errorCode: 'CANNOT_DELETE_COLUMN',
                 statusCode: HttpStatus.BAD_REQUEST,
             });
         }

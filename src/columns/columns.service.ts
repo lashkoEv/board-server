@@ -4,6 +4,7 @@ import { BaseService } from '../common/base';
 import { ProjectColumn } from './models/column.entity';
 import { Repository, Sequelize } from 'sequelize-typescript';
 import { UpdateColumnDto } from './models/update-column.dto';
+import { ColumnStatus } from '../common/resources/columns';
 
 @Injectable()
 export class ColumnsService extends BaseService<ProjectColumn> {
@@ -15,10 +16,14 @@ export class ColumnsService extends BaseService<ProjectColumn> {
         super(columnModel);
     }
 
-    async create(data: CreateColumnDto): Promise<ProjectColumn> {
+    async create(
+        data: CreateColumnDto,
+        status?: number,
+    ): Promise<ProjectColumn> {
         return await this.columnModel.create({
             title: data.title,
             projectId: data.projectId,
+            status: status ?? ColumnStatus.custom,
         });
     }
 

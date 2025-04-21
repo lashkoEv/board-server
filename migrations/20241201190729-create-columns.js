@@ -7,8 +7,9 @@ module.exports = {
             CREATE TABLE IF NOT EXISTS columns (
                 id INTEGER AUTO_INCREMENT,
                 
-                title VARCHAR(255) UNIQUE NOT NULL,
+                title VARCHAR(255) NOT NULL,
                 projectId INT NOT NULL,
+                status INT NOT NULL DEFAULT 4 COMMENT '1 - toDo, 2 - inProgress, 3 - done, 4 - custom',
         
                 createdAt DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
                 updatedAt DATETIME NULL DEFAULT CURRENT_TIMESTAMP,

@@ -9,6 +9,8 @@ import { BaseService } from '../common/base';
 import { Repository, Sequelize } from 'sequelize-typescript';
 import { User } from '../users/models';
 import sequelize from 'sequelize';
+import { ProjectColumn } from '../columns/models/column.entity';
+import { ColumnStatus, ColumnStatusTitle } from '../common/resources/columns';
 
 @Injectable()
 export class ProjectsService extends BaseService<Project> {
@@ -20,6 +22,8 @@ export class ProjectsService extends BaseService<Project> {
         private readonly projectMemberModel: Repository<ProjectMember>,
         @Inject('USER_MODEL')
         private readonly userModel: Repository<User>,
+        @Inject('COLUMN_MODEL')
+        private readonly columnModel: Repository<ProjectColumn>,
     ) {
         super(projectModel);
     }
@@ -45,6 +49,27 @@ export class ProjectsService extends BaseService<Project> {
                     transaction,
                 );
             }
+
+            await this.columnModel.bulkCreate(
+                [
+                    {
+                        title: ColumnStatusTitle[ColumnStatus.toDo],
+                        status: ColumnStatus.toDo,
+                        projectId: project.id,
+                    },
+                    {
+                        title: ColumnStatusTitle[ColumnStatus.inProgress],
+                        status: ColumnStatus.inProgress,
+                        projectId: project.id,
+                    },
+                    {
+                        title: ColumnStatusTitle[ColumnStatus.done],
+                        status: ColumnStatus.done,
+                        projectId: project.id,
+                    },
+                ],
+                { transaction },
+            );
 
             return project;
         });

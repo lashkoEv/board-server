@@ -7,5 +7,7 @@
   "PROJECT_NOT_FOUND": "Project not found!",
   "WRONG_DATA_FOR_REGISTER": "Unable to register with the entered data!",
   "COLUMN_NOT_FOUND": "Column not found!",
-  "USER_IS_NOT_THE_PROJECT_OWNER": "The user is not the project owner."
+  "USER_IS_NOT_THE_PROJECT_OWNER": "The user is not the project owner.",
+  "TASK_NOT_FOUND": "Task not found!",
+  "CANNOT_DELETE_COLUMN": "You cannot delete this column!"
 }

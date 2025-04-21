@@ -5,7 +5,7 @@ export class ColumnsDto {
     constructor(count: number, data: any[]) {
         this.count = count;
 
-        this.data = data.map((project) => new ColumnDto(project));
+        this.data = data.map((column) => new ColumnDto(column));
     }
 
     @ApiProperty({ type: () => Number, required: true })

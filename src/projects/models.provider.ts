@@ -1,5 +1,6 @@
 import { Project, ProjectMember } from './models';
 import { User } from '../users/models';
+import { ProjectColumn } from '../columns/models/column.entity';
 
 export const modelProviders = [
     {
@@ -13,5 +14,9 @@ export const modelProviders = [
     {
         provide: 'PROJECT_MEMBER_MODEL',
         useValue: ProjectMember,
+    },
+    {
+        provide: 'COLUMN_MODEL',
+        useValue: ProjectColumn,
     },
 ];
