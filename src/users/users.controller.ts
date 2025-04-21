@@ -44,8 +44,8 @@ export class UsersController {
 
         if (user) {
             throw new BadRequestException({
-                message: 'USER_ALREADY_EXIST',
-                errorCode: 'USER_ALREADY_EXIST',
+                message: 'WRONG_DATA_FOR_REGISTER',
+                errorCode: 'WRONG_DATA_FOR_REGISTER',
                 statusCode: HttpStatus.BAD_REQUEST,
             });
         }

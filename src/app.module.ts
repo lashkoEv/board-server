@@ -4,6 +4,8 @@ import { UsersModule } from './users/users.module';
 import { SessionsModule } from './sessions/sessions.module';
 import { ProjectsModule } from './projects/projects.module';
 import { SequelizeModule } from './common/database/sequelize.module';
+import { ColumnsModule } from './columns/columns.module';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
     imports: [
@@ -12,6 +14,8 @@ import { SequelizeModule } from './common/database/sequelize.module';
         UsersModule,
         SessionsModule,
         ProjectsModule,
+        ColumnsModule,
+        TasksModule,
     ],
     providers: [],
     controllers: [],

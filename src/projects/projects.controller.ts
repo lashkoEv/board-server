@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     Body,
     Controller,
     Delete,
@@ -99,7 +100,7 @@ export class ProjectsController {
     @ApiResponse({ type: () => EmptyDto })
     @ApiOperation({ summary: 'Delete project with specified identifier' })
     @Delete(':id')
-    async delete(@Param() param: IdDto) {
+    async delete(@Param() param: IdDto, @Request() req) {
         const project = await this.projectsService.findById(param.id);
 
         if (!project) {
@@ -107,6 +108,14 @@ export class ProjectsController {
                 message: 'PROJECT_NOT_FOUND',
                 errorCode: 'PROJECT_NOT_FOUND',
                 statusCode: HttpStatus.NOT_FOUND,
+            });
+        }
+
+        if (req.user.userId !== project.ownerId) {
+            throw new BadRequestException({
+                message: 'USER_IS_NOT_THE_PROJECT_OWNER',
+                errorCode: 'USER_IS_NOT_THE_PROJECT_OWNER',
+                statusCode: HttpStatus.BAD_REQUEST,
             });
         }
 
@@ -123,6 +132,7 @@ export class ProjectsController {
     async update(
         @Param() param: IdDto,
         @Body() body: CreateOrUpdateProjectDto,
+        @Request() req,
     ) {
         let project = await this.projectsService.findById(param.id, []);
 
@@ -131,6 +141,14 @@ export class ProjectsController {
                 message: 'PROJECT_NOT_FOUND',
                 errorCode: 'PROJECT_NOT_FOUND',
                 statusCode: HttpStatus.NOT_FOUND,
+            });
+        }
+
+        if (req.user.userId !== project.ownerId) {
+            throw new BadRequestException({
+                message: 'USER_IS_NOT_THE_PROJECT_OWNER',
+                errorCode: 'USER_IS_NOT_THE_PROJECT_OWNER',
+                statusCode: HttpStatus.BAD_REQUEST,
             });
         }
 
