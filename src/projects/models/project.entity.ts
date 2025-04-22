@@ -37,16 +37,20 @@ import { Op } from 'sequelize';
         ],
     }),
     byOwnerOrMemberId: (userId: number) => ({
-        where: {
-            [Op.or]: [{ ownerId: userId }, { '$members.id$': userId }],
-        },
         include: [
             {
                 model: User,
-                through: { attributes: [] },
                 as: 'members',
+                required: false,
+                through: {
+                    where: { memberId: userId },
+                    attributes: [],
+                },
             },
         ],
+        where: {
+            [Op.or]: [{ ownerId: userId }],
+        },
     }),
 }))
 @Table({
