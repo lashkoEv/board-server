@@ -6,6 +6,7 @@ export class ProjectDto {
         this.id = data.id;
         this.title = data.title;
         this.description = data.description;
+        this.ownerId = data.ownerId;
         this.owner = data.get('owner')
             ? new UserDto(data.get('owner'))
             : undefined;
@@ -25,6 +26,9 @@ export class ProjectDto {
 
     @ApiProperty({ type: () => String, required: false })
     readonly description: string;
+
+    @ApiProperty({ type: () => Number, required: true })
+    readonly ownerId: number;
 
     @ApiProperty({ type: () => UserDto, required: false })
     readonly owner?: UserDto;

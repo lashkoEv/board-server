@@ -56,12 +56,18 @@ export class ProjectsController {
     @Get()
     async getAll(@Query() query: GetProjectsDto, @Request() req) {
         const scopes: any[] = [
-            { method: ['byOwnerOrMemberId', req.user.userId] },
+            {
+                method: [
+                    'byOwnerOrMemberWithQuery',
+                    req.user.userId,
+                    query.query,
+                ],
+            },
         ];
 
-        let projects = [];
+        let projects = await this.projectsService.findAll(scopes);
 
-        const count = await this.projectsService.count(scopes);
+        const count = projects.length;
 
         if (count) {
             if (query.limit || query.offset) {

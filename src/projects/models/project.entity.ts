@@ -7,6 +7,7 @@ import {
     BelongsTo,
     BelongsToMany,
     Scopes,
+    Sequelize,
 } from 'sequelize-typescript';
 import { User } from '../../users/models';
 import { ProjectMember } from './project-member.entity';
@@ -22,6 +23,14 @@ import { Op } from 'sequelize';
     byPage: (limit: number = 10, offset: number = 0) => ({
         limit,
         offset,
+    }),
+    query: (query: string) => ({
+        where: {
+            [Op.or]: [
+                { title: { [Op.like]: `%${query}%` } },
+                { description: { [Op.like]: `%${query}%` } },
+            ],
+        },
     }),
     byOwnerId: (ownerId: number) => ({
         where: { ownerId },
@@ -52,6 +61,44 @@ import { Op } from 'sequelize';
             [Op.or]: [{ ownerId: userId }],
         },
     }),
+    byOwnerOrMemberWithQuery: (userId: number, query?: string) => {
+        const queryConditions = query
+            ? {
+                  [Op.or]: [
+                      { title: { [Op.like]: `%${query}%` } },
+                      { description: { [Op.like]: `%${query}%` } },
+                  ],
+              }
+            : {};
+
+        return {
+            where: {
+                [Op.and]: [
+                    {
+                        [Op.or]: [
+                            { ownerId: userId },
+                            {
+                                id: {
+                                    [Op.in]: Sequelize.literal(`(
+                                    SELECT projectId FROM projectMembers
+                                    WHERE memberId = ${userId}
+                                )`),
+                                },
+                            },
+                        ],
+                    },
+                    queryConditions,
+                ],
+            },
+            include: [
+                {
+                    model: User,
+                    as: 'members',
+                    through: { attributes: [] },
+                },
+            ],
+        };
+    },
 }))
 @Table({
     tableName: 'projects',

@@ -18,6 +18,7 @@ import { UsersService } from './users.service';
 import { UserRoles } from '../common/resources/users';
 import { CreateUserDto, UserDto } from './models';
 import { Public, Roles } from '../common/decorators';
+import { UsersDto } from './models/users.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -53,5 +54,24 @@ export class UsersController {
         await this.usersService.create(body);
 
         return {};
+    }
+
+    @Roles(UserRoles.user)
+    @ApiBearerAuth()
+    @ApiResponse({ type: () => UsersDto })
+    @ApiOperation({ summary: 'Get all users' })
+    @Get()
+    async getAll(@Request() req): Promise<UsersDto> {
+        const scopes: any[] = [{ method: ['excludesId', req.user.userId] }];
+
+        const count = await this.usersService.getCount(scopes);
+
+        let users = [];
+
+        if (count) {
+            users = await this.usersService.getList(scopes);
+        }
+
+        return new UsersDto(count, users);
     }
 }

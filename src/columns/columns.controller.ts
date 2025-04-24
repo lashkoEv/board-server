@@ -102,7 +102,7 @@ export class ColumnsController {
             });
         }
 
-        if (req.user.userId !== column.project.ownerId) {
+        if (req.user.userId !== column.get('project').ownerId) {
             throw new BadRequestException({
                 message: 'USER_IS_NOT_THE_PROJECT_OWNER',
                 errorCode: 'USER_IS_NOT_THE_PROJECT_OWNER',
@@ -146,7 +146,7 @@ export class ColumnsController {
             });
         }
 
-        if (req.user.userId !== column.project.ownerId) {
+        if (req.user.userId !== column.get('project').ownerId) {
             throw new BadRequestException({
                 message: 'USER_IS_NOT_THE_PROJECT_OWNER',
                 errorCode: 'USER_IS_NOT_THE_PROJECT_OWNER',
