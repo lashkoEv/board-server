@@ -146,6 +146,7 @@ export class TasksController {
         const task = await this.tasksService.findById(param.id, [
             'withAuthor',
             'withAssignee',
+            'withColumn',
         ]);
 
         if (!task) {
