@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserDto } from '../../users/models';
+import { ColumnDto } from '../../columns/models/column.dto';
 
 export class ProjectDto {
     constructor(data: any) {
@@ -10,10 +11,8 @@ export class ProjectDto {
         this.owner = data.get('owner')
             ? new UserDto(data.get('owner'))
             : undefined;
-        this.members =
-            data.get('members') && data.get('members').length
-                ? data.get('members').map((member) => new UserDto(member))
-                : undefined;
+        this.members = data.get('members')?.map((m) => new UserDto(m));
+        this.columns = data.get('columns')?.map((c) => new ColumnDto(c));
         this.createdAt = data.createdAt;
         this.updatedAt = data.updatedAt;
     }
@@ -35,6 +34,9 @@ export class ProjectDto {
 
     @ApiProperty({ type: () => [UserDto], required: false })
     readonly members?: UserDto[];
+
+    @ApiProperty({ type: () => [ColumnDto], required: false })
+    readonly columns?: ColumnDto[];
 
     @ApiProperty({ type: () => String, required: true })
     readonly createdAt: string;

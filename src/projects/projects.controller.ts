@@ -86,7 +86,7 @@ export class ProjectsController {
     @ApiOperation({ summary: 'Get project with specified identifier' })
     @Get(':id')
     async getById(@Param() param: IdDto) {
-        const scopes = ['withOwner', 'withMembers'];
+        const scopes = ['withOwner', 'withMembers', 'withColumns'];
 
         const project = await this.projectsService.findById(param.id, scopes);
 

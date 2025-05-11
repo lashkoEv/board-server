@@ -8,10 +8,12 @@ import {
     BelongsToMany,
     Scopes,
     Sequelize,
+    HasMany,
 } from 'sequelize-typescript';
 import { User } from '../../users/models';
 import { ProjectMember } from './project-member.entity';
 import { Op } from 'sequelize';
+import { ProjectColumn } from '../../columns/models/column.entity';
 
 @Scopes(() => ({
     withOwner: {
@@ -19,6 +21,16 @@ import { Op } from 'sequelize';
     },
     withMembers: {
         include: [{ model: User, through: { attributes: [] }, as: 'members' }],
+    },
+    withColumns: {
+        include: [
+            {
+                model: ProjectColumn,
+                as: 'columns',
+                required: false,
+                attributes: ['id', 'title', 'status'],
+            },
+        ],
     },
     byPage: (limit: number = 10, offset: number = 0) => ({
         limit,
@@ -129,4 +141,7 @@ export class Project extends Model {
 
     @BelongsToMany(() => User, () => ProjectMember)
     members: User[];
+
+    @HasMany(() => ProjectColumn, 'projectId')
+    columns: ProjectColumn[];
 }

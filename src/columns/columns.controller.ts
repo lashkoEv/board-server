@@ -76,7 +76,27 @@ export class ColumnsController {
         const count = await this.columnsService.count(scopes);
 
         if (count) {
-            scopes.push('withTasks');
+            if (query.taskQuery || query.assigneeIds?.length) {
+                const rawAssigneeIds = Array.isArray(query.assigneeIds)
+                    ? query.assigneeIds
+                    : query.assigneeIds
+                      ? [query.assigneeIds]
+                      : [];
+
+                const parsedAssigneeIds = rawAssigneeIds.map((id) =>
+                    id.toString() === '__null__' ? null : +id,
+                );
+
+                scopes.push({
+                    method: [
+                        'withFilteredTasks',
+                        query.taskQuery,
+                        parsedAssigneeIds,
+                    ],
+                });
+            } else {
+                scopes.push('withTasks');
+            }
 
             columns = await this.columnsService.findAll(scopes);
         }

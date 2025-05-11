@@ -11,6 +11,8 @@ import {
 import { Project } from '../../projects/models';
 import { Task } from '../../tasks/models/task.entity';
 import { ColumnStatus } from '../../common/resources/columns';
+import { User } from '../../users/models';
+import { Op } from 'sequelize';
 
 @Scopes(() => ({
     withProject: {
@@ -20,8 +22,56 @@ import { ColumnStatus } from '../../common/resources/columns';
         where: { projectId },
     }),
     withTasks: {
-        include: [{ model: Task, as: 'tasks' }],
+        include: [
+            {
+                model: Task,
+                as: 'tasks',
+                include: [
+                    {
+                        model: User,
+                        as: 'assignee',
+                        attributes: ['id', 'username', 'email'],
+                    },
+                ],
+            },
+        ],
     },
+    withFilteredTasks: (taskQuery?: string, assigneeId?: number[]) => ({
+        include: [
+            {
+                model: Task,
+                as: 'tasks',
+                where: {
+                    ...(taskQuery && {
+                        title: { [Op.like]: `%${taskQuery}%` },
+                    }),
+                    ...(Array.isArray(assigneeId) &&
+                        assigneeId.length > 0 && {
+                            assigneeId: {
+                                [Op.or]: [
+                                    {
+                                        [Op.in]: assigneeId.filter(
+                                            (v) => v !== null,
+                                        ),
+                                    },
+                                    ...(assigneeId.includes(null)
+                                        ? [{ [Op.is]: null }]
+                                        : []),
+                                ],
+                            },
+                        }),
+                },
+                required: false,
+                include: [
+                    {
+                        model: User,
+                        as: 'assignee',
+                        attributes: ['id', 'username', 'email'],
+                    },
+                ],
+            },
+        ],
+    }),
 }))
 @Table({
     tableName: 'columns',

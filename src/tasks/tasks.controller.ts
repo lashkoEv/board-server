@@ -29,6 +29,7 @@ import { TasksDto } from './models/tasks.dto';
 import { UsersService } from '../users/users.service';
 import { ColumnsService } from '../columns/columns.service';
 import { GetTasksDto } from './models/get-tasks.dto';
+import { parseIds } from '../common/helpers/parse-id.helper';
 
 @ApiTags('tasks')
 @Controller('tasks')
@@ -98,12 +99,25 @@ export class TasksController {
     @ApiOperation({ summary: 'Get tasks by projectId' })
     @ApiResponse({ type: () => TasksDto })
     @Get()
-    async getAll(@Query() dto: GetTasksDto) {
-        const scopes: any = [{ method: ['byProjectId', dto.projectId] }];
+    async getAll(@Query() query: GetTasksDto) {
+        const scopes: any = [{ method: ['byProjectId', query.projectId] }];
 
-        if (dto.isBacklog) {
-            console.log(typeof dto.isBacklog, dto.isBacklog);
+        if (query.isBacklog) {
             scopes.push('inBacklog');
+        }
+
+        if (query.query) {
+            scopes.push({ method: ['byQuery', query.query] });
+        }
+
+        if (query.assigneeIds?.length) {
+            scopes.push({
+                method: ['byAssigneeIds', parseIds(query.assigneeIds)],
+            });
+        }
+
+        if (query.columnIds?.length) {
+            scopes.push({ method: ['byColumnIds', parseIds(query.columnIds)] });
         }
 
         const count = await this.tasksService.count(scopes);
@@ -111,7 +125,12 @@ export class TasksController {
         let tasks = [];
 
         if (count) {
-            scopes.push('withAuthor', 'withAssignee');
+            scopes.push('withAuthor', 'withAssignee', 'withColumn');
+
+            if (query.limit || query.offset) {
+                scopes.push({ method: ['byPage', query.limit, query.offset] });
+            }
+
             tasks = await this.tasksService.findAll(scopes);
         }
 

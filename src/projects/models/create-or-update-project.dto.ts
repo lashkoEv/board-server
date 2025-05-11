@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-    ArrayNotEmpty,
     IsArray,
     IsInt,
     IsOptional,
@@ -26,6 +25,5 @@ export class CreateOrUpdateProjectDto {
     @IsArray()
     @IsOptional()
     @IsInt({ each: true })
-    @ArrayNotEmpty()
     memberIds?: number[];
 }

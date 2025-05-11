@@ -8,4 +8,10 @@ export class GetColumnsDto {
     @Min(1)
     @Type(() => Number)
     readonly projectId: number;
+
+    @ApiProperty({ required: false })
+    readonly taskQuery?: string;
+
+    @ApiProperty({ required: false })
+    readonly assigneeIds?: number[];
 }

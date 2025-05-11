@@ -6,6 +6,7 @@ import {
     ForeignKey,
     BelongsTo,
     Scopes,
+    Sequelize,
 } from 'sequelize-typescript';
 import { Project } from '../../projects/models';
 import { User } from '../../users/models';
@@ -25,13 +26,25 @@ import { Op } from 'sequelize';
     byProjectId: (projectId: number) => ({
         where: { projectId },
     }),
+    byPage: (limit: number = 10, offset: number = 0) => ({
+        limit,
+        offset,
+    }),
+    byQuery: (query: string) => ({
+        where: {
+            title: { [Op.like]: `%${query}%` },
+        },
+    }),
     inBacklog: {
         where: {
             [Op.or]: [
                 { columnId: null },
                 {
-                    '$column.status$': {
-                        [Op.ne]: 3,
+                    columnId: {
+                        [Op.in]: Sequelize.literal(`(
+                        SELECT id FROM columns
+                        WHERE columns.status != 3
+                    )`),
                     },
                 },
             ],
@@ -45,6 +58,27 @@ import { Op } from 'sequelize';
             },
         ],
     },
+    byAssigneeIds: (ids: (number | null)[]) => ({
+        where: {
+            assigneeId: {
+                [Op.or]: [
+                    { [Op.in]: ids.filter((id) => id !== null) },
+                    ...(ids.includes(null) ? [{ [Op.is]: null }] : []),
+                ],
+            },
+        },
+    }),
+
+    byColumnIds: (ids: (number | null)[]) => ({
+        where: {
+            columnId: {
+                [Op.or]: [
+                    { [Op.in]: ids.filter((id) => id !== null) },
+                    ...(ids.includes(null) ? [{ [Op.is]: null }] : []),
+                ],
+            },
+        },
+    }),
 }))
 @Table({
     tableName: 'tasks',
