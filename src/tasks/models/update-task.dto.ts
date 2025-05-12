@@ -7,6 +7,7 @@ import {
     Min,
     MinLength,
 } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
 export class UpdateTaskDto {
     @ApiProperty({ type: () => String, required: false })
@@ -25,15 +26,26 @@ export class UpdateTaskDto {
     @IsOptional()
     @IsInt()
     @Min(0)
+    @Type(() => Number)
     estimate?: number;
 
     @ApiProperty({ type: () => Number, required: false })
     @IsOptional()
     @IsInt()
+    @Type(() => Number)
     columnId?: number;
 
     @ApiProperty({ type: () => Number, required: false })
     @IsOptional()
     @IsInt()
+    @Type(() => Number)
     assigneeId?: number;
+
+    @IsOptional()
+    @Type(() => Number)
+    @ApiProperty({ type: [Number], required: false })
+    @Transform(({ value }) =>
+        Array.isArray(value) ? value.map(Number) : [Number(value)],
+    )
+    existingAttachments?: number[];
 }

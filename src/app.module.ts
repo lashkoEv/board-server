@@ -6,6 +6,7 @@ import { ProjectsModule } from './projects/projects.module';
 import { SequelizeModule } from './common/database/sequelize.module';
 import { ColumnsModule } from './columns/columns.module';
 import { TasksModule } from './tasks/tasks.module';
+import { AttachmentsModule } from './attachments/attachments.module';
 
 @Module({
     imports: [
@@ -16,6 +17,7 @@ import { TasksModule } from './tasks/tasks.module';
         ProjectsModule,
         ColumnsModule,
         TasksModule,
+        AttachmentsModule,
     ],
     providers: [],
     controllers: [],

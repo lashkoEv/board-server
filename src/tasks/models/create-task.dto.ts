@@ -7,6 +7,7 @@ import {
     Min,
     MinLength,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateTaskDto {
     @ApiProperty({ type: () => String, required: true })
@@ -24,16 +25,19 @@ export class CreateTaskDto {
     @IsOptional()
     @IsInt()
     @Min(0)
+    @Type(() => Number)
     estimate?: number;
 
     @ApiProperty({ type: () => Number, required: true })
     @IsInt()
     @Min(1)
+    @Type(() => Number)
     projectId: number;
 
     @ApiProperty({ type: () => Number, required: false })
     @IsOptional()
     @IsInt()
+    @Type(() => Number)
     columnId?: number;
 
     @ApiProperty({ type: () => Number, required: false })

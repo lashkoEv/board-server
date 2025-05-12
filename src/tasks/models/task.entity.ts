@@ -7,11 +7,13 @@ import {
     BelongsTo,
     Scopes,
     Sequelize,
+    HasMany,
 } from 'sequelize-typescript';
 import { Project } from '../../projects/models';
 import { User } from '../../users/models';
 import { ProjectColumn } from '../../columns/models/column.entity';
 import { Op } from 'sequelize';
+import { Attachment } from '../../attachments/models/attachment.entity';
 
 @Scopes(() => ({
     withAuthor: {
@@ -22,6 +24,9 @@ import { Op } from 'sequelize';
     },
     withColumn: {
         include: [{ model: ProjectColumn, as: 'column' }],
+    },
+    withAttachments: {
+        include: [{ model: Attachment, as: 'attachments' }],
     },
     byProjectId: (projectId: number) => ({
         where: { projectId },
@@ -131,4 +136,7 @@ export class Task extends Model {
 
     @BelongsTo(() => User, 'assigneeId')
     assignee: User;
+
+    @HasMany(() => Attachment)
+    attachments: Attachment[];
 }

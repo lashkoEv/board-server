@@ -2,6 +2,7 @@ import { ProjectColumn } from '../columns/models/column.entity';
 import { Project, ProjectMember } from '../projects/models';
 import { User } from '../users/models';
 import { Task } from './models/task.entity';
+import { Attachment } from '../attachments/models/attachment.entity';
 
 export const modelProviders = [
     {
@@ -23,5 +24,9 @@ export const modelProviders = [
     {
         provide: 'TASK_MODEL',
         useValue: Task,
+    },
+    {
+        provide: 'ATTACHMENT_MODEL',
+        useValue: Attachment,
     },
 ];

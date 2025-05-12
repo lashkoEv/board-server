@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ColumnDto } from '../../columns/models/column.dto';
 import { UserDto } from '../../users/models';
+import { AttachmentDto } from '../../attachments/models/attachment.dto';
 
 export class TaskDto {
     constructor(data: any) {
@@ -23,6 +24,9 @@ export class TaskDto {
         this.assignee = data.get?.('assignee')
             ? new UserDto(data.get('assignee'))
             : undefined;
+        this.attachments = data
+            .get('attachments')
+            ?.map((a) => new AttachmentDto(a));
         this.createdAt = data.createdAt;
         this.updatedAt = data.updatedAt;
     }
@@ -59,6 +63,9 @@ export class TaskDto {
 
     @ApiProperty({ type: () => UserDto, required: false })
     readonly assignee?: UserDto;
+
+    @ApiProperty({ type: () => [AttachmentDto], required: false })
+    readonly attachments?: AttachmentDto[];
 
     @ApiProperty({ type: () => String })
     readonly createdAt: string;

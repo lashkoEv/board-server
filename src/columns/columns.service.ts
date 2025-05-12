@@ -5,6 +5,7 @@ import { ProjectColumn } from './models/column.entity';
 import { Repository, Sequelize } from 'sequelize-typescript';
 import { UpdateColumnDto } from './models/update-column.dto';
 import { ColumnStatus } from '../common/resources/columns';
+import sequelize from 'sequelize';
 
 @Injectable()
 export class ColumnsService extends BaseService<ProjectColumn> {
@@ -44,7 +45,13 @@ export class ColumnsService extends BaseService<ProjectColumn> {
         return await this.columnModel.scope(scopes).count();
     }
 
-    async findById(id: number, scopes?: any[]): Promise<ProjectColumn> {
-        return await this.columnModel.scope(scopes).findByPk(id);
+    async findById(
+        id: number,
+        scopes?: any[],
+        transaction?: sequelize.Transaction,
+    ): Promise<ProjectColumn> {
+        return await this.columnModel
+            .scope(scopes)
+            .findByPk(id, { transaction });
     }
 }

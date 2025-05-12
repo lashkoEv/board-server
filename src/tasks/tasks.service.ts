@@ -4,6 +4,7 @@ import { BaseService } from '../common/base';
 import { Task } from './models/task.entity';
 import { CreateTaskDto } from './models/create-task.dto';
 import { UpdateTaskDto } from './models/update-task.dto';
+import sequelize from 'sequelize';
 
 @Injectable()
 export class TasksService extends BaseService<Task> {
@@ -15,26 +16,40 @@ export class TasksService extends BaseService<Task> {
         super(taskModel);
     }
 
-    async create(data: CreateTaskDto, authorId: number): Promise<Task> {
-        return await this.taskModel.create({
-            title: data.title,
-            description: data.description,
-            estimate: data.estimate ?? 0,
-            projectId: data.projectId,
-            columnId: data.columnId,
-            assigneeId: data.assigneeId,
-            authorId,
-        });
+    async create(
+        data: CreateTaskDto,
+        authorId: number,
+        transaction?: sequelize.Transaction,
+    ): Promise<Task> {
+        return await this.taskModel.create(
+            {
+                title: data.title,
+                description: data.description,
+                estimate: data.estimate ?? 0,
+                projectId: data.projectId,
+                columnId: data.columnId,
+                assigneeId: data.assigneeId,
+                authorId,
+            },
+            { transaction },
+        );
     }
 
-    async update(task: Task, data: UpdateTaskDto): Promise<Task> {
-        return await task.update({
-            title: data.title ?? task.title,
-            description: data.description ?? task.description,
-            estimate: data.estimate ?? task.estimate,
-            columnId: data.columnId ?? task.columnId,
-            assigneeId: data.assigneeId ?? task.assigneeId,
-        });
+    async update(
+        task: Task,
+        data: UpdateTaskDto,
+        transaction?: sequelize.Transaction,
+    ): Promise<Task> {
+        return await task.update(
+            {
+                title: data.title ?? task.title,
+                description: data.description ?? task.description,
+                estimate: data.estimate ?? task.estimate,
+                columnId: data.columnId ?? task.columnId,
+                assigneeId: data.assigneeId ?? task.assigneeId,
+            },
+            { transaction },
+        );
     }
 
     async findAll(scopes?: any[]): Promise<Task[]> {
@@ -45,7 +60,11 @@ export class TasksService extends BaseService<Task> {
         return await this.taskModel.scope(scopes).count();
     }
 
-    async findById(id: number, scopes?: any[]): Promise<Task> {
-        return await this.taskModel.scope(scopes).findByPk(id);
+    async findById(
+        id: number,
+        scopes?: any[],
+        transaction?: sequelize.Transaction,
+    ): Promise<Task> {
+        return await this.taskModel.scope(scopes).findByPk(id, { transaction });
     }
 }

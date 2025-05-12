@@ -142,7 +142,13 @@ export class ProjectsService extends BaseService<Project> {
         return await this.projectModel.scope(scopes).count();
     }
 
-    async findById(id: number, scopes?: any[]): Promise<Project> {
-        return await this.projectModel.scope(scopes).findByPk(id);
+    async findById(
+        id: number,
+        scopes?: any[],
+        transaction?: sequelize.Transaction,
+    ): Promise<Project> {
+        return await this.projectModel
+            .scope(scopes)
+            .findByPk(id, { transaction });
     }
 }

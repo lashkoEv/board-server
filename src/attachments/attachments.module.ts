@@ -1,22 +1,19 @@
 import { Module } from '@nestjs/common';
-import { TasksService } from './tasks.service';
-import { TasksController } from './tasks.controller';
+import { AttachmentsService } from './attachments.service';
+import { AttachmentsController } from './attachments.controller';
 import { SequelizeModule } from '../common/database/sequelize.module';
 import { ConfigModule } from '../common/config/config.module';
 import { jwtModuleInstance } from '../common/jwt/jwt.module';
 import { redisModuleInstance } from '../common/database/redis.provider';
 import { LoggerModule } from '../common/logger/logger.module';
-import { ColumnsService } from '../columns/columns.service';
-import { ProjectsService } from '../projects/projects.service';
+import { UsersService } from '../users/users.service';
 import { SessionsService } from '../sessions/sessions.service';
 import { JwtStrategy } from '../common/strategies/jwt.strategy';
 import { guardProviders } from '../common/guards/guard.provider';
-import { UsersService } from '../users/users.service';
 import { modelProviders } from './models.provider';
-import { AttachmentsService } from '../attachments/attachments.service';
 
 @Module({
-    controllers: [TasksController],
+    controllers: [AttachmentsController],
     imports: [
         SequelizeModule,
         ConfigModule,
@@ -25,9 +22,6 @@ import { AttachmentsService } from '../attachments/attachments.service';
         LoggerModule,
     ],
     providers: [
-        TasksService,
-        ProjectsService,
-        ColumnsService,
         AttachmentsService,
         UsersService,
         SessionsService,
@@ -36,4 +30,4 @@ import { AttachmentsService } from '../attachments/attachments.service';
         ...modelProviders,
     ],
 })
-export class TasksModule {}
+export class AttachmentsModule {}

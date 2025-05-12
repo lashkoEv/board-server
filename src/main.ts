@@ -5,6 +5,8 @@ import { TranslatorFilter } from 'nestjs-translator';
 import { translatorService } from './common/translator/translator.provider';
 import { ConfigService } from './common/config/config.service';
 import { ValidationPipe } from '@nestjs/common';
+import * as path from 'node:path';
+import * as express from 'express';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -29,6 +31,8 @@ async function bootstrap() {
     );
 
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
+
+    app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
     await app.listen(process.env.PORT ?? 3000);
 }

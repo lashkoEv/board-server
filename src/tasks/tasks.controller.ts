@@ -4,12 +4,15 @@ import {
     Delete,
     Get,
     HttpStatus,
+    Inject,
     NotFoundException,
     Param,
     Post,
     Put,
     Query,
     Request,
+    UploadedFiles,
+    UseInterceptors,
 } from '@nestjs/common';
 import {
     ApiBearerAuth,
@@ -30,68 +33,110 @@ import { UsersService } from '../users/users.service';
 import { ColumnsService } from '../columns/columns.service';
 import { GetTasksDto } from './models/get-tasks.dto';
 import { parseIds } from '../common/helpers/parse-id.helper';
+import { AttachmentsDiskInterceptor } from '../common/multer/multer.config';
+import { AttachmentsService } from '../attachments/attachments.service';
+import { Sequelize } from 'sequelize-typescript';
 
 @ApiTags('tasks')
 @Controller('tasks')
 export class TasksController {
     constructor(
+        @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
         private readonly tasksService: TasksService,
         private readonly projectsService: ProjectsService,
         private readonly columnsService: ColumnsService,
         private readonly usersService: UsersService,
+        private readonly attachmentsService: AttachmentsService,
     ) {}
 
     @Roles(UserRoles.user)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Create new task' })
     @ApiResponse({ type: () => TaskDto })
+    @UseInterceptors(AttachmentsDiskInterceptor())
     @Post()
-    async create(@Body() dto: CreateTaskDto, @Request() req) {
-        const scopes = ['withAuthor'];
+    async create(
+        @Body() dto: CreateTaskDto,
+        @Request() req,
+        @UploadedFiles() attachments: Express.Multer.File[],
+    ) {
+        return await this.sequelize.transaction(async (transaction) => {
+            const scopes = ['withAuthor'];
 
-        const project = await this.projectsService.findById(dto.projectId);
+            const project = await this.projectsService.findById(
+                dto.projectId,
+                [],
+                transaction,
+            );
 
-        if (!project) {
-            throw new NotFoundException({
-                message: 'PROJECT_NOT_FOUND',
-                errorCode: 'PROJECT_NOT_FOUND',
-                statusCode: HttpStatus.NOT_FOUND,
-            });
-        }
-
-        if (dto.columnId) {
-            const column = await this.columnsService.findById(dto.columnId);
-
-            if (!column) {
+            if (!project) {
                 throw new NotFoundException({
-                    message: 'COLUMN_NOT_FOUND',
-                    errorCode: 'COLUMN_NOT_FOUND',
+                    message: 'PROJECT_NOT_FOUND',
+                    errorCode: 'PROJECT_NOT_FOUND',
                     statusCode: HttpStatus.NOT_FOUND,
                 });
             }
 
-            scopes.push('withColumn');
-        }
+            if (dto.columnId) {
+                const column = await this.columnsService.findById(
+                    dto.columnId,
+                    [],
+                    transaction,
+                );
 
-        if (dto.assigneeId) {
-            const user = await this.usersService.getUser(dto.assigneeId);
+                if (!column) {
+                    throw new NotFoundException({
+                        message: 'COLUMN_NOT_FOUND',
+                        errorCode: 'COLUMN_NOT_FOUND',
+                        statusCode: HttpStatus.NOT_FOUND,
+                    });
+                }
 
-            if (!user) {
-                throw new NotFoundException({
-                    message: 'USER_NOT_FOUND',
-                    errorCode: 'USER_NOT_FOUND',
-                    statusCode: HttpStatus.NOT_FOUND,
-                });
+                scopes.push('withColumn');
             }
 
-            scopes.push('withAssignee');
-        }
+            if (dto.assigneeId) {
+                const user = await this.usersService.getUser(
+                    dto.assigneeId,
+                    [],
+                    transaction,
+                );
 
-        let task = await this.tasksService.create(dto, req.user.userId);
+                if (!user) {
+                    throw new NotFoundException({
+                        message: 'USER_NOT_FOUND',
+                        errorCode: 'USER_NOT_FOUND',
+                        statusCode: HttpStatus.NOT_FOUND,
+                    });
+                }
 
-        task = await this.tasksService.findById(task.id, scopes);
+                scopes.push('withAssignee');
+            }
 
-        return new TaskDto(task);
+            let task = await this.tasksService.create(
+                dto,
+                req.user.userId,
+                transaction,
+            );
+
+            if (attachments?.length) {
+                await this.attachmentsService.bulkCreate(
+                    task.id,
+                    attachments,
+                    transaction,
+                );
+
+                scopes.push('withAttachments');
+            }
+
+            task = await this.tasksService.findById(
+                task.id,
+                scopes,
+                transaction,
+            );
+
+            return new TaskDto(task);
+        });
     }
 
     @Roles(UserRoles.user)
@@ -147,6 +192,7 @@ export class TasksController {
             'withAuthor',
             'withAssignee',
             'withColumn',
+            'withAttachments',
         ]);
 
         if (!task) {
@@ -164,27 +210,52 @@ export class TasksController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Update task' })
     @ApiResponse({ type: () => TaskDto })
+    @UseInterceptors(AttachmentsDiskInterceptor())
     @Put(':id')
-    async update(@Param() param: IdDto, @Body() dto: UpdateTaskDto) {
-        let task = await this.tasksService.findById(param.id);
+    async update(
+        @Param() param: IdDto,
+        @Body() dto: UpdateTaskDto,
+        @UploadedFiles() attachments: Express.Multer.File[],
+    ) {
+        return await this.sequelize.transaction(async (transaction) => {
+            let task = await this.tasksService.findById(
+                param.id,
+                [],
+                transaction,
+            );
 
-        if (!task) {
-            throw new NotFoundException({
-                message: 'TASK_NOT_FOUND',
-                errorCode: 'TASK_NOT_FOUND',
-                statusCode: HttpStatus.NOT_FOUND,
-            });
-        }
+            if (!task) {
+                throw new NotFoundException({
+                    message: 'TASK_NOT_FOUND',
+                    errorCode: 'TASK_NOT_FOUND',
+                    statusCode: HttpStatus.NOT_FOUND,
+                });
+            }
 
-        await this.tasksService.update(task, dto);
+            await this.tasksService.update(task, dto, transaction);
 
-        task = await this.tasksService.findById(task.id, [
-            'withColumn',
-            'withAuthor',
-            'withAssignee',
-        ]);
+            await this.attachmentsService.deleteExcept(
+                task.id,
+                dto.existingAttachments ?? [],
+                transaction,
+            );
 
-        return new TaskDto(task);
+            if (attachments) {
+                await this.attachmentsService.bulkCreate(
+                    task.id,
+                    attachments,
+                    transaction,
+                );
+            }
+
+            task = await this.tasksService.findById(
+                task.id,
+                ['withColumn', 'withAuthor', 'withAssignee', 'withAttachments'],
+                transaction,
+            );
+
+            return new TaskDto(task);
+        });
     }
 
     @Roles(UserRoles.user)
@@ -193,18 +264,26 @@ export class TasksController {
     @ApiResponse({ type: () => EmptyDto })
     @Delete(':id')
     async delete(@Param() param: IdDto) {
-        const task = await this.tasksService.findById(param.id);
+        return await this.sequelize.transaction(async (transaction) => {
+            const task = await this.tasksService.findById(
+                param.id,
+                [],
+                transaction,
+            );
 
-        if (!task) {
-            throw new NotFoundException({
-                message: 'TASK_NOT_FOUND',
-                errorCode: 'TASK_NOT_FOUND',
-                statusCode: HttpStatus.NOT_FOUND,
-            });
-        }
+            if (!task) {
+                throw new NotFoundException({
+                    message: 'TASK_NOT_FOUND',
+                    errorCode: 'TASK_NOT_FOUND',
+                    statusCode: HttpStatus.NOT_FOUND,
+                });
+            }
 
-        await task.destroy();
+            await this.attachmentsService.deleteByTaskId(task.id, transaction);
 
-        return new EmptyDto();
+            await task.destroy();
+
+            return new EmptyDto();
+        });
     }
 }
