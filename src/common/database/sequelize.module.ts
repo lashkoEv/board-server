@@ -5,6 +5,7 @@ import { Project, ProjectMember } from '../../projects/models';
 import { ProjectColumn } from '../../columns/models/column.entity';
 import { Task } from '../../tasks/models/task.entity';
 import { Attachment } from '../../attachments/models/attachment.entity';
+import { Comment } from '../../comments/models/comment.entity';
 
 @Module({
     providers: [
@@ -15,6 +16,7 @@ import { Attachment } from '../../attachments/models/attachment.entity';
             ProjectColumn,
             Task,
             Attachment,
+            Comment,
         ]),
     ],
     exports: ['SEQUELIZE'],

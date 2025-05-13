@@ -9,5 +9,7 @@
   "COLUMN_NOT_FOUND": "Column not found!",
   "USER_IS_NOT_THE_PROJECT_OWNER": "The user is not the project owner.",
   "TASK_NOT_FOUND": "Task not found!",
-  "CANNOT_DELETE_COLUMN": "You cannot delete this column!"
+  "CANNOT_DELETE_COLUMN": "You cannot delete this column!",
+  "COMMENT_NOT_FOUND": "Comment not found!",
+  "FORBIDDEN": "You don't have access to perform this action!"
 }

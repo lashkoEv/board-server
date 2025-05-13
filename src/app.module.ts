@@ -7,6 +7,7 @@ import { SequelizeModule } from './common/database/sequelize.module';
 import { ColumnsModule } from './columns/columns.module';
 import { TasksModule } from './tasks/tasks.module';
 import { AttachmentsModule } from './attachments/attachments.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
     imports: [
@@ -18,6 +19,7 @@ import { AttachmentsModule } from './attachments/attachments.module';
         ColumnsModule,
         TasksModule,
         AttachmentsModule,
+        CommentsModule,
     ],
     providers: [],
     controllers: [],

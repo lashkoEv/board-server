@@ -3,6 +3,7 @@ import { Project, ProjectMember } from '../projects/models';
 import { User } from '../users/models';
 import { Task } from './models/task.entity';
 import { Attachment } from '../attachments/models/attachment.entity';
+import { Comment } from '../comments/models/comment.entity';
 
 export const modelProviders = [
     {
@@ -28,5 +29,9 @@ export const modelProviders = [
     {
         provide: 'ATTACHMENT_MODEL',
         useValue: Attachment,
+    },
+    {
+        provide: 'COMMENT_MODEL',
+        useValue: Comment,
     },
 ];
