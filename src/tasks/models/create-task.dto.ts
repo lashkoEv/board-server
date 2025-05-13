@@ -43,5 +43,6 @@ export class CreateTaskDto {
     @ApiProperty({ type: () => Number, required: false })
     @IsOptional()
     @IsInt()
+    @Type(() => Number)
     assigneeId?: number;
 }
