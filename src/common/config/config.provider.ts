@@ -4,10 +4,7 @@ import * as path from 'path';
 
 const provideConfig = async () => {
     const nodeEnv = process.env.NODE_ENV;
-    const envFilePath =
-        nodeEnv === 'local'
-            ? path.resolve(`./.env.${nodeEnv}`)
-            : path.resolve(`/opt/nodejs/.env.${nodeEnv}`);
+    const envFilePath = path.resolve('./.env.local');
 
     return dotenv.parse(fs.readFileSync(envFilePath));
 };
